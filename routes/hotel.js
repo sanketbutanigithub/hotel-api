@@ -7,13 +7,19 @@ const jwtVerify = (req, res, next) => {
   const headers = req.headers;
   const token = headers.authorization;
   if (!token) {
-    return next();
+    return res.status(401).json({ message: "Unauthorized" });
   }
-  console.log({ token });
-  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-  console.log({ decodedToken });
-  req.user = decodedToken;
-  next();
+  try{
+    console.log({ token });
+    const decodedToken = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);
+    console.log({ decodedToken });
+    req.user = decodedToken;
+    next();
+  }catch(error){
+    console.log("Error on verify : ",error)
+    return res.status(401).json({ message: "Invalid token" });
+  }
+  
 };
 
 router.use(jwtVerify);
